@@ -79,40 +79,52 @@ Production-ready **Model Context Protocol (MCP)** server for **Suricata IDS/IPS,
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Universal Quick Start
 
-### 1. Prerequisites
-* Python 3.11+
-* Suricata 7.x or 8.x
+### Option 1: Zero-Install with `uvx` (Recommended)
+No git clone or manual setup required. `uvx` executes the server directly from GitHub:
 
-### 2. Installation using `uv`
 ```bash
-# Clone the repository
+# Automated environment and health check
+uvx --from git+https://github.com/nks1097/suricata-mcp-server.git suricata-mcp --doctor
+```
+
+---
+
+### Option 2: Installation using `pip` or `git`
+```bash
+# 1. Clone the repository
 git clone https://github.com/nks1097/suricata-mcp-server.git
 cd suricata-mcp-server
 
-# Create virtual environment
-uv venv
+# 2. Create and activate virtual environment
+python3 -m venv .venv
 source .venv/bin/activate # On Windows: .\.venv\Scripts\Activate.ps1
 
-# Install package in editable mode
-uv pip install -e .
+# 3. Install package in editable mode
+pip install -e .
 
-# Setup environment configuration
-cp .env.example .env      # On Windows: Copy-Item .env.example .env
+# 4. Run automated environment doctor
+suricata-mcp --doctor
 ```
 
 ---
 
 ## ⚙️ MCP Client Configuration
 
-### Claude Desktop (`claude_desktop_config.json`)
+### 1. Claude Desktop (`claude_desktop_config.json`)
+
+#### Linux / macOS:
 ```json
 {
   "mcpServers": {
     "suricata": {
-      "command": "python",
-      "args": ["-m", "suricata_mcp.server", "--transport", "stdio"],
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/nks1097/suricata-mcp-server.git",
+        "suricata-mcp"
+      ],
       "env": {
         "SURICATA_CONFIG_PATH": "/etc/suricata/suricata.yaml",
         "SURICATA_EVE_PATH": "/var/log/suricata/eve.json",
@@ -121,6 +133,75 @@ cp .env.example .env      # On Windows: Copy-Item .env.example .env
     }
   }
 }
+```
+
+#### Windows:
+```json
+{
+  "mcpServers": {
+    "suricata": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/nks1097/suricata-mcp-server.git",
+        "suricata-mcp"
+      ],
+      "env": {
+        "SURICATA_CONFIG_PATH": "C:/Program Files/Suricata/suricata.yaml",
+        "SURICATA_EVE_PATH": "C:/Program Files/Suricata/log/eve.json",
+        "MCP_OPERATION_MODE": "operacional"
+      }
+    }
+  }
+}
+```
+
+---
+
+### 2. Cursor IDE (`.cursor/mcp.json`)
+```json
+{
+  "mcpServers": {
+    "suricata": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/nks1097/suricata-mcp-server.git",
+        "suricata-mcp"
+      ]
+    }
+  }
+}
+```
+
+---
+
+### 3. Server Deployment via Docker (SOC / SIEM)
+```json
+{
+  "mcpServers": {
+    "suricata": {
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-v", "/var/log/suricata:/var/log/suricata:ro",
+        "-v", "/etc/suricata:/etc/suricata:ro",
+        "-e", "SURICATA_EVE_PATH=/var/log/suricata/eve.json",
+        "ghcr.io/nks1097/suricata-mcp-server:latest"
+      ]
+    }
+  }
+}
+```
+
+---
+
+## 🩺 Built-in Health Doctor: `suricata-mcp --doctor`
+
+Verify your local Suricata engine, test EVE JSON telemetry readability, inspect local rules, and automatically output tailored JSON configuration snippets:
+
+```bash
+suricata-mcp --doctor
 ```
 
 ---

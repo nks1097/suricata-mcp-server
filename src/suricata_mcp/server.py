@@ -5,8 +5,15 @@ configura prompts para agentes de IA e gerencia os transportes STDIO e SSE.
 """
 
 import argparse
+import contextlib
+import json
 import logging
+import os
+import platform
+import shutil
+import subprocess
 import sys
+from pathlib import Path
 
 try:
     from mcp.server.mcpserver import MCPServer
@@ -106,11 +113,139 @@ def create_server() -> MCPServer:
     return server
 
 
+def run_doctor() -> int:
+    """Diagnóstico de ambiente para verificar pré-requisitos e gerar configurações prontas para clientes MCP."""
+    if hasattr(sys.stdout, "reconfigure"):
+        with contextlib.suppress(Exception):
+            sys.stdout.reconfigure(encoding="utf-8")
+
+    settings = get_settings()
+
+    print("=" * 72)
+    print("[*] SURICATA MCP SERVER - DIAGNOSTICO DE AMBIENTE & CONFIGURACAO")
+    print("=" * 72)
+    print(f"Sistema Operacional: {platform.system()} {platform.release()} ({os.name})")
+    print(f"Python: {platform.python_version()} ({sys.executable})")
+    print(f"Versão do Pacote: {settings.app_version}")
+    print(f"Modo de Operação RBAC: {settings.mcp_operation_mode}")
+    print("-" * 72)
+
+    all_ok = True
+
+    # 1. Executável do Suricata
+    suricata_bin = shutil.which(settings.suricata_executable) or (
+        settings.suricata_executable if Path(settings.suricata_executable).is_file() else None
+    )
+    if suricata_bin:
+        version_str = "Versão não identificada"
+        try:
+            res = subprocess.run([suricata_bin, "-V"], capture_output=True, text=True, timeout=5)
+            version_str = (res.stdout or res.stderr).strip().splitlines()[0]
+        except Exception:
+            pass
+        print(f"[OK]  Executável Suricata: {suricata_bin} ({version_str})")
+    else:
+        print(f"[!]   Executável Suricata: '{settings.suricata_executable}' não encontrado no PATH nem no disco.")
+        print("      Dica: Defina a variável SURICATA_EXECUTABLE com o caminho correto.")
+        all_ok = False
+
+    # 2. Arquivo de Configuração
+    config_p = Path(settings.suricata_config_path)
+    if config_p.is_file():
+        print(f"[OK]  Arquivo suricata.yaml: {config_p.resolve()}")
+    else:
+        print(f"[!]   Arquivo suricata.yaml: '{settings.suricata_config_path}' não encontrado.")
+        print("      Dica: Defina a variável SURICATA_CONFIG_PATH com o caminho do seu suricata.yaml.")
+        all_ok = False
+
+    # 3. Log de Eventos EVE JSON
+    eve_p = Path(settings.suricata_eve_path)
+    if eve_p.is_file():
+        size_mb = eve_p.stat().st_size / (1024 * 1024)
+        print(f"[OK]  Arquivo EVE JSON: {eve_p.resolve()} ({size_mb:.2f} MB)")
+    else:
+        print(f"[!]   Arquivo EVE JSON: '{settings.suricata_eve_path}' não encontrado.")
+        print("      Dica: Verifique se o Suricata está gravando em eve.json ou ajuste SURICATA_EVE_PATH.")
+        all_ok = False
+
+    # 4. Diretório de Regras
+    rules_p = Path(settings.suricata_rules_dir)
+    if rules_p.is_dir():
+        rule_count = len(list(rules_p.glob("*.rules")))
+        print(f"[OK]  Diretório de regras: {rules_p.resolve()} ({rule_count} arquivos .rules)")
+    else:
+        print(f"[INFO] Diretório de regras '{settings.suricata_rules_dir}' não localizado (opcional se não usar gestão local).")
+
+    # 5. Diretório de PCAPs
+    pcap_p = Path(settings.suricata_pcap_allowed_dir)
+    pcap_p.mkdir(parents=True, exist_ok=True)
+    print(f"[OK]  Diretório permitido para PCAPs: {pcap_p.resolve()}")
+
+    # 6. Diretório de Relatórios
+    report_p = Path(settings.mcp_report_output_dir)
+    report_p.mkdir(parents=True, exist_ok=True)
+    print(f"[OK]  Diretório de relatórios gerados: {report_p.resolve()}")
+
+    print("=" * 72)
+    print("📋 CONFIGURAÇÃO RECOMENDADA PARA SEU CLIENTE MCP (COPIE E COLE)")
+    print("=" * 72)
+
+    # Exemplo Universal com uvx (funciona em qualquer máquina do mundo)
+    universal_uvx_config = {
+        "mcpServers": {
+            "suricata": {
+                "command": "uvx",
+                "args": [
+                    "--from",
+                    "git+https://github.com/nks1097/suricata-mcp-server.git",
+                    "suricata-mcp",
+                ],
+                "env": {
+                    "SURICATA_CONFIG_PATH": str(config_p).replace("\\", "/"),
+                    "SURICATA_EVE_PATH": str(eve_p).replace("\\", "/"),
+                    "MCP_OPERATION_MODE": settings.mcp_operation_mode,
+                },
+            }
+        }
+    }
+
+    # Exemplo com Python local
+    local_python_config = {
+        "mcpServers": {
+            "suricata": {
+                "command": sys.executable.replace("\\", "/"),
+                "args": ["-m", "suricata_mcp.server", "--transport", "stdio"],
+                "env": {
+                    "SURICATA_CONFIG_PATH": str(config_p).replace("\\", "/"),
+                    "SURICATA_EVE_PATH": str(eve_p).replace("\\", "/"),
+                    "MCP_OPERATION_MODE": settings.mcp_operation_mode,
+                },
+            }
+        }
+    }
+
+    print("\nOpção 1: Execução Universal com uvx (Sem clonar, sem instalar nada manualmente):")
+    print(json.dumps(universal_uvx_config, indent=2))
+
+    print("\nOpção 2: Execução com o Python atual desta máquina:")
+    print(json.dumps(local_python_config, indent=2))
+
+    print("=" * 72)
+    return 0 if all_ok else 1
+
+
 def main() -> None:
     """Função de inicialização via linha de comando."""
     settings = get_settings()
 
-    parser = argparse.ArgumentParser(description="Suricata MCP Server")
+    parser = argparse.ArgumentParser(
+        description="Suricata MCP Server - Servidor Model Context Protocol com 100 ferramentas para Suricata IDS/IPS"
+    )
+    parser.add_argument(
+        "--doctor",
+        action="store_true",
+        help="Executa diagnóstico completo de ambiente, verifica Suricata e gera snippets de configuração prontos",
+    )
     parser.add_argument(
         "--transport",
         choices=["stdio", "sse"],
@@ -120,6 +255,9 @@ def main() -> None:
     parser.add_argument("--host", default=settings.mcp_host, help="Host para escuta em modo SSE")
     parser.add_argument("--port", type=int, default=settings.mcp_port, help="Porta para escuta em modo SSE")
     args = parser.parse_args()
+
+    if args.doctor:
+        sys.exit(run_doctor())
 
     server = create_server()
 

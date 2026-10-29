@@ -1,85 +1,117 @@
-# Guia de Instalação do Suricata MCP Server
+# Guia de Instalação e Execução Universal do Suricata MCP Server
 
-O **Suricata MCP Server** pode ser executado nativamente em ambientes Linux e Windows ou em contêineres Docker.
-
----
-
-## 1. Requisitos do Sistema
-
-* **Python:** 3.11, 3.12, 3.13 ou 3.14.
-* **Suricata:** Versões 6.x, 7.x ou 8.x (testado e homologado no Suricata 8.0.7).
-* **Gerenciador de Pacotes:** `uv` (recomendado para máxima velocidade) ou `pip`.
+O **Suricata MCP Server** foi projetado para operar com zero atrito em qualquer ambiente: servidores Linux de produção (Ubuntu, Debian, RedHat, Rocky, CentOS), contêineres Docker, estações de trabalho Windows ou macOS.
 
 ---
 
-## 2. Instalação Local com `uv` (Recomendado)
+## 🚀 Método 1: Zero-Install com `uvx` (Recomendado)
 
-### Windows (PowerShell):
-```powershell
-# 1. Navegue até o diretório do projeto
-cd "C:\Users\Natanael Krindges\.gemini\antigravity-ide\mcp\suricata"
+Se você utiliza `uv` na sua máquina, **não é necessário clonar o repositório nem gerenciar ambientes virtuais manualmente**. O `uvx` baixa, isola e executa o servidor instantaneamente a partir do GitHub:
 
-# 2. Crie o ambiente virtual isolado
-uv venv
-
-# 3. Ative o ambiente virtual
-.\.venv\Scripts\Activate.ps1
-
-# 4. Instale o pacote e as dependências
-uv pip install -e .
-
-# 5. Copie o arquivo de configuração
-Copy-Item .env.example .env
+```bash
+uvx --from git+https://github.com/nks1097/suricata-mcp-server.git suricata-mcp --doctor
 ```
 
-### Linux / macOS (Bash):
+---
+
+## 🛠️ Método 2: Instalação via `pip` ou `uv`
+
+### Linux / macOS
 ```bash
-# 1. Clone ou navegue até o repositório
+# 1. Clone o repositório oficial
+git clone https://github.com/nks1097/suricata-mcp-server.git
 cd suricata-mcp-server
 
 # 2. Crie e ative o ambiente virtual
-uv venv
+python3 -m venv .venv
 source .venv/bin/activate
 
 # 3. Instale o pacote
-uv pip install -e .
+pip install -e .
 
-# 4. Copie o arquivo de variáveis de ambiente
+# 4. Copie o modelo de ambiente e ajuste se necessário
 cp .env.example .env
+
+# 5. Execute o diagnóstico automático
+suricata-mcp --doctor
+```
+
+### Windows (PowerShell)
+```powershell
+# 1. Clone o repositório
+git clone https://github.com/nks1097/suricata-mcp-server.git
+cd suricata-mcp-server
+
+# 2. Crie e ative o ambiente virtual
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+
+# 3. Instale o pacote
+pip install -e .
+
+# 4. Copie o arquivo de variáveis
+copy .env.example .env
+
+# 5. Execute o diagnóstico de ambiente
+suricata-mcp --doctor
 ```
 
 ---
 
-## 3. Instalação e Execução com Docker
+## 🐳 Método 3: Execução em Servidores e Produção com Docker
 
-O projeto inclui um `Dockerfile` multi-stage otimizado e seguro executando como usuário não-root:
+Para monitorar servidores Linux corporativos onde o Suricata roda no host:
 
+### Docker Run (Modo STDIO):
 ```bash
-# Construção da imagem Docker
-docker compose build
+docker run -i --rm \
+  -v /var/log/suricata:/var/log/suricata:ro \
+  -v /etc/suricata:/etc/suricata:ro \
+  -v /var/run/suricata:/var/run/suricata:ro \
+  -v /var/lib/suricata/rules:/var/lib/suricata/rules:rw \
+  ghcr.io/nks1097/suricata-mcp-server:latest
+```
 
-# Execução em segundo plano com transporte SSE (porta 8080)
+### Docker Compose (Modo SSE / Webhook):
+```bash
+# Construção e inicialização em segundo plano na porta 8080
 docker compose up -d
 
-# Visualização de logs
+# Visualização dos logs
 docker compose logs -f suricata-mcp
 ```
 
 ---
 
-## 4. Configuração do Cliente MCP
+## 🩺 Diagnóstico Automático: `suricata-mcp --doctor`
 
-### Claude Desktop (`claude_desktop_config.json`):
+O comando `suricata-mcp --doctor` verifica automaticamente:
+1. Se o binário do Suricata está presente no PATH ou disco.
+2. Se o arquivo `suricata.yaml` é legível e válido.
+3. Se o log `eve.json` existe e seu tamanho atual.
+4. Permissões de escrita nos diretórios de relatórios e auditoria.
+5. Gera automaticamente o bloco JSON pronto para copiar e colar no seu cliente MCP.
+
+---
+
+## ⚙️ Configuração Pronta para Clientes MCP
+
+### 1. Claude Desktop (`claude_desktop_config.json`)
+
+#### Linux / macOS:
 ```json
 {
   "mcpServers": {
     "suricata": {
-      "command": "C:\\Users\\Natanael Krindges\\.gemini\\antigravity-ide\\mcp\\suricata\\.venv\\Scripts\\suricata-mcp.exe",
-      "args": ["--transport", "stdio"],
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/nks1097/suricata-mcp-server.git",
+        "suricata-mcp"
+      ],
       "env": {
-        "SURICATA_CONFIG_PATH": "C:/Program Files/Suricata/suricata.yaml",
-        "SURICATA_EVE_PATH": "C:/Program Files/Suricata/log/eve.json",
-        "SURICATA_LOG_DIR": "C:/Program Files/Suricata/log",
+        "SURICATA_CONFIG_PATH": "/etc/suricata/suricata.yaml",
+        "SURICATA_EVE_PATH": "/var/log/suricata/eve.json",
         "MCP_OPERATION_MODE": "operacional"
       }
     }
@@ -87,20 +119,72 @@ docker compose logs -f suricata-mcp
 }
 ```
 
-### Antigravity IDE (`mcp_config.json`):
+#### Windows:
 ```json
 {
   "mcpServers": {
-    "suricata-mcp": {
-      "command": "python",
-      "args": ["-m", "suricata_mcp.server", "--transport", "stdio"],
-      "cwd": "C:/Users/Natanael Krindges/.gemini/antigravity-ide/mcp/suricata",
+    "suricata": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/nks1097/suricata-mcp-server.git",
+        "suricata-mcp"
+      ],
       "env": {
         "SURICATA_CONFIG_PATH": "C:/Program Files/Suricata/suricata.yaml",
-        "SURICATA_EVE_PATH": "C:/Program Files/Suricata/log/eve.json"
+        "SURICATA_EVE_PATH": "C:/Program Files/Suricata/log/eve.json",
+        "MCP_OPERATION_MODE": "operacional"
       }
     }
   }
 }
 ```
 
+---
+
+### 2. Cursor IDE (`.cursor/mcp.json`)
+```json
+{
+  "mcpServers": {
+    "suricata": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/nks1097/suricata-mcp-server.git",
+        "suricata-mcp"
+      ]
+    }
+  }
+}
+```
+
+---
+
+### 3. VS Code (Cline / Roo Code / Copilot)
+Adicione nas configurações do MCP (`settings.json` ou arquivo de configuração do plugin):
+```json
+{
+  "mcpServers": {
+    "suricata-mcp": {
+      "command": "suricata-mcp",
+      "args": ["--transport", "stdio"],
+      "env": {
+        "MCP_OPERATION_MODE": "operacional"
+      }
+    }
+  }
+}
+```
+
+---
+
+### 4. Permissões de Leitura no Linux
+No Linux, o arquivo `/var/log/suricata/eve.json` geralmente pertence ao usuário `suricata`. Para permitir que o MCP leia os eventos sem precisar de root:
+
+```bash
+# Adicione seu usuário ao grupo suricata
+sudo usermod -aG suricata $USER
+
+# Ou garanta permissão de leitura aos logs:
+sudo chmod o+r /var/log/suricata/eve.json
+```

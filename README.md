@@ -81,40 +81,74 @@ Consulte o catálogo completo em [docs/ferramentas.md](docs/ferramentas.md).
 
 ---
 
-## 🚀 Instalação Rápida
+## 🚀 Instalação Rápida e Universal
 
-### 1. Pré-requisitos
-* Python 3.11+
-* Suricata 7.x ou 8.x
+### Opção 1: Zero-Install com `uvx` (Recomendado)
+Não é necessário clonar nem instalar nada manualmente. O comando `uvx` executa o servidor diretamente do GitHub:
 
-### 2. Instalação com `uv`
-```powershell
-# Clone o repositório
-git clone https://github.com/nks1097/suricata-mcp-server.git
-cd suricata-mcp-server
-
-# Crie e ative o ambiente virtual
-uv venv
-.\.venv\Scripts\Activate.ps1   # No Linux: source .venv/bin/activate
-
-# Instale o pacote
-uv pip install -e .
-
-# Configure o ambiente
-Copy-Item .env.example .env    # No Linux: cp .env.example .env
+```bash
+# Diagnóstico automático do seu ambiente Suricata
+uvx --from git+https://github.com/nks1097/suricata-mcp-server.git suricata-mcp --doctor
 ```
 
 ---
 
-## ⚙️ Configuração do Cliente MCP
+### Opção 2: Instalação via `pip` ou `git`
+```bash
+# 1. Clone o repositório
+git clone https://github.com/nks1097/suricata-mcp-server.git
+cd suricata-mcp-server
 
-### Claude Desktop (`claude_desktop_config.json`)
+# 2. Crie e ative o ambiente virtual
+python -m venv .venv
+# No Linux/macOS: source .venv/bin/activate
+# No Windows:     .\.venv\Scripts\Activate.ps1
+
+# 3. Instale o pacote
+pip install -e .
+
+# 4. Execute o diagnóstico automático
+suricata-mcp --doctor
+```
+
+---
+
+## ⚙️ Configuração nos Clientes MCP
+
+### 1. Claude Desktop (`claude_desktop_config.json`)
+
+#### Linux / macOS:
 ```json
 {
   "mcpServers": {
     "suricata": {
-      "command": "C:\\Users\\Natanael Krindges\\.gemini\\antigravity-ide\\mcp\\suricata\\.venv\\Scripts\\suricata-mcp.exe",
-      "args": ["--transport", "stdio"],
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/nks1097/suricata-mcp-server.git",
+        "suricata-mcp"
+      ],
+      "env": {
+        "SURICATA_CONFIG_PATH": "/etc/suricata/suricata.yaml",
+        "SURICATA_EVE_PATH": "/var/log/suricata/eve.json",
+        "MCP_OPERATION_MODE": "operacional"
+      }
+    }
+  }
+}
+```
+
+#### Windows:
+```json
+{
+  "mcpServers": {
+    "suricata": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/nks1097/suricata-mcp-server.git",
+        "suricata-mcp"
+      ],
       "env": {
         "SURICATA_CONFIG_PATH": "C:/Program Files/Suricata/suricata.yaml",
         "SURICATA_EVE_PATH": "C:/Program Files/Suricata/log/eve.json",
@@ -124,6 +158,56 @@ Copy-Item .env.example .env    # No Linux: cp .env.example .env
   }
 }
 ```
+
+---
+
+### 2. Cursor IDE (`.cursor/mcp.json`)
+```json
+{
+  "mcpServers": {
+    "suricata": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/nks1097/suricata-mcp-server.git",
+        "suricata-mcp"
+      ]
+    }
+  }
+}
+```
+
+---
+
+### 3. Execução em Servidor via Docker (Produção SOC / SIEM)
+```json
+{
+  "mcpServers": {
+    "suricata": {
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-v", "/var/log/suricata:/var/log/suricata:ro",
+        "-v", "/etc/suricata:/etc/suricata:ro",
+        "-e", "SURICATA_EVE_PATH=/var/log/suricata/eve.json",
+        "ghcr.io/nks1097/suricata-mcp-server:latest"
+      ]
+    }
+  }
+}
+```
+
+---
+
+## 🩺 Diagnóstico com `suricata-mcp --doctor`
+
+Para verificar se o Suricata está corretamente configurado no seu sistema e validar arquivos de log, execute:
+
+```bash
+suricata-mcp --doctor
+```
+
+O comando inspeciona os caminhos, mede o tamanho do `eve.json`, checa as regras locais e exibe a configuração JSON personalizada para a sua máquina.
 
 ---
 
