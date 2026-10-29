@@ -231,6 +231,92 @@ suricata-mcp --doctor
 
 ---
 
+### 4. Secure Remote Access via SSH (WAN / LAN / WSL / Cloud)
+
+Ideal for connecting AI clients (**LM Studio**, **Claude Desktop**, **Cursor**) running on your workstation to remote Suricata sensors hosted on dedicated Linux servers, cloud VMs, Raspberry Pi, or WSL, using SSH as a secure encrypted tunnel:
+
+#### Step 1: Configure SSH Key Authentication (Passwordless)
+Generate an SSH key pair on the client machine and authorize it on the remote sensor:
+
+```powershell
+# On client machine (Windows PowerShell):
+ssh-keygen -t ed25519 -N '""'
+Get-Content "$env:USERPROFILE\.ssh\id_ed25519.pub"
+```
+*(On Linux/macOS client, run `ssh-keygen -t ed25519 -N ""` and `cat ~/.ssh/id_ed25519.pub`)*.
+
+Copy the public key string (starts with `ssh-ed25519 AAAAC3...`).
+
+On the remote sensor (where Suricata and `uv` are installed):
+```bash
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+echo "PASTE_COPIED_PUBLIC_KEY_HERE" >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+```
+
+Verify passwordless connection from the client:
+```powershell
+ssh -p 2222 -o BatchMode=yes root@192.168.0.107 "echo OK"
+```
+*(If `OK` is returned, key authentication is working)*.
+
+---
+
+#### Step 2: Configuration in `mcp.json`
+
+##### Local Network / WSL:
+```json
+{
+  "mcpServers": {
+    "suricata-remote": {
+      "command": "ssh",
+      "args": [
+        "-p",
+        "2222",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ServerAliveInterval=30",
+        "-o",
+        "ServerAliveCountMax=3",
+        "root@192.168.0.107",
+        "SURICATA_CONFIG_PATH=/etc/suricata/suricata.yaml SURICATA_EVE_PATH=/var/log/suricata/eve.json MCP_OPERATION_MODE=operacional ~/.local/bin/uvx --from git+https://github.com/nks1097/suricata-mcp-server.git suricata-mcp"
+      ]
+    }
+  }
+}
+```
+
+##### External Internet (WAN / DDNS / Cloud):
+```json
+{
+  "mcpServers": {
+    "suricata-wan": {
+      "command": "ssh",
+      "args": [
+        "-p",
+        "<EXTERNAL_PORT>",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ServerAliveInterval=30",
+        "-o",
+        "ServerAliveCountMax=3",
+        "<USER>@<PUBLIC_IP_OR_DDNS>",
+        "SURICATA_CONFIG_PATH=/etc/suricata/suricata.yaml SURICATA_EVE_PATH=/var/log/suricata/eve.json MCP_OPERATION_MODE=operacional ~/.local/bin/uvx --from git+https://github.com/nks1097/suricata-mcp-server.git suricata-mcp"
+      ]
+    }
+  }
+}
+```
+
+> 🛡️ **Network Stability Parameters:**
+> * `BatchMode=yes`: Prevents process hangs on interactive password prompts if the key fails.
+> * `ServerAliveInterval=30` and `ServerAliveCountMax=3`: Keeps the connection alive across NAT routers and stateful firewalls during idle periods.
+```
+
+---
+
 ## 🩺 Built-in Health Doctor: `suricata-mcp --doctor`
 
 Verify your local Suricata engine, test EVE JSON telemetry readability, inspect local rules, and automatically output tailored JSON configuration snippets:

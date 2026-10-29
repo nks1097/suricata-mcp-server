@@ -238,6 +238,92 @@ python -m suricata_mcp --doctor
 
 ---
 
+### 4. Acesso Remoto Seguro via SSH (WAN / LAN / WSL / Cloud)
+
+Ideal para conectar ferramentas de IA (como **LM Studio**, **Claude Desktop** ou **Cursor**) a sensores Suricata remotos rodando em servidores dedicados, instâncias em nuvem, Raspberry Pi ou WSL, utilizando SSH como túnel seguro e criptografado:
+
+#### Passo 1: Configurar Chave SSH no Cliente (Sem Senha)
+Gere um par de chaves no computador cliente (onde está o LM Studio/Claude Desktop) e autorize no servidor remoto:
+
+```powershell
+# No PowerShell da máquina cliente (Windows):
+ssh-keygen -t ed25519 -N '""'
+Get-Content "$env:USERPROFILE\.ssh\id_ed25519.pub"
+```
+*(No Linux ou macOS cliente, use `ssh-keygen -t ed25519 -N ""` e `cat ~/.ssh/id_ed25519.pub`)*.
+
+Copie a chave exibida (iniciando em `ssh-ed25519 AAAAC3...`).
+
+No servidor remoto (onde o Suricata e o `uv` estão instalados):
+```bash
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+echo "COLE_AQUI_A_CHAVE_COPIADA" >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+```
+
+Valide o acesso sem senha a partir do cliente:
+```powershell
+ssh -p 2222 -o BatchMode=yes root@192.168.0.107 "echo OK"
+```
+*(Retornando `OK`, a autenticação está pronta).*
+
+---
+
+#### Passo 2: Configuração no `mcp.json`
+
+##### Exemplo para Rede Local / WSL:
+```json
+{
+  "mcpServers": {
+    "suricata-remoto": {
+      "command": "ssh",
+      "args": [
+        "-p",
+        "2222",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ServerAliveInterval=30",
+        "-o",
+        "ServerAliveCountMax=3",
+        "root@192.168.0.107",
+        "SURICATA_CONFIG_PATH=/etc/suricata/suricata.yaml SURICATA_EVE_PATH=/var/log/suricata/eve.json MCP_OPERATION_MODE=operacional ~/.local/bin/uvx --from git+https://github.com/nks1097/suricata-mcp-server.git suricata-mcp"
+      ]
+    }
+  }
+}
+```
+
+##### Exemplo para Internet Externa (WAN / DDNS / Cloud):
+```json
+{
+  "mcpServers": {
+    "suricata-wan": {
+      "command": "ssh",
+      "args": [
+        "-p",
+        "<PORTA_EXTERNA>",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ServerAliveInterval=30",
+        "-o",
+        "ServerAliveCountMax=3",
+        "<USUARIO>@<IP_PUBLICO_OU_DDNS>",
+        "SURICATA_CONFIG_PATH=/etc/suricata/suricata.yaml SURICATA_EVE_PATH=/var/log/suricata/eve.json MCP_OPERATION_MODE=operacional ~/.local/bin/uvx --from git+https://github.com/nks1097/suricata-mcp-server.git suricata-mcp"
+      ]
+    }
+  }
+}
+```
+
+> 🛡️ **Parâmetros de Estabilidade de Conexão:**
+> * `BatchMode=yes`: Impede travamento por prompts interativos de senha caso a chave falhe.
+> * `ServerAliveInterval=30` e `ServerAliveCountMax=3`: Envia pacotes *keep-alive* a cada 30 segundos, impedindo que firewalls corporativos, roteadores ou tabelas de NAT encerrem silenciosamente conexões SSH ociosas.
+```
+
+---
+
 ## 🩺 Diagnóstico com `suricata-mcp --doctor`
 
 Para verificar se o Suricata está corretamente configurado no seu sistema e validar arquivos de log, execute:

@@ -203,7 +203,60 @@ Adicione nas configurações do MCP (`settings.json` ou arquivo de configuraçã
 
 ---
 
-### 4. Permissões de Leitura no Linux
+### 4. LM Studio / Acesso Remoto Seguro via SSH (WAN / LAN / WSL / Cloud)
+
+Para conectar o **LM Studio** ou qualquer cliente MCP local a um sensor Suricata remoto em outra máquina ou rede:
+
+#### 1. Gerar e autorizar chave SSH (Autenticação sem senha):
+```powershell
+# No cliente (Windows):
+ssh-keygen -t ed25519 -N '""'
+Get-Content "$env:USERPROFILE\.ssh\id_ed25519.pub"
+```
+*(No Linux/macOS cliente: `ssh-keygen -t ed25519 -N ""` e `cat ~/.ssh/id_ed25519.pub`)*.
+
+No servidor remoto do Suricata:
+```bash
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+echo "COLE_AQUI_A_CHAVE_COPIADA" >> ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+```
+
+Validar conexão sem senha:
+```powershell
+ssh -p 2222 -o BatchMode=yes root@192.168.0.107 "echo OK"
+```
+
+#### 2. Configurar no `mcp.json` do LM Studio:
+```json
+{
+  "mcpServers": {
+    "suricata-wan": {
+      "command": "ssh",
+      "args": [
+        "-p",
+        "2222",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ServerAliveInterval=30",
+        "-o",
+        "ServerAliveCountMax=3",
+        "root@192.168.0.107",
+        "SURICATA_CONFIG_PATH=/etc/suricata/suricata.yaml SURICATA_EVE_PATH=/var/log/suricata/eve.json MCP_OPERATION_MODE=operacional ~/.local/bin/uvx --from git+https://github.com/nks1097/suricata-mcp-server.git suricata-mcp"
+      ]
+    }
+  }
+}
+```
+
+Parâmetros de estabilidade:
+* `BatchMode=yes`: Evita que o processo trave esperando senha caso a chave falhe.
+* `ServerAliveInterval=30` e `ServerAliveCountMax=3`: Evita que firewalls ou roteadores NAT derrubem a conexão ociosa.
+
+---
+
+### 5. Permissões de Leitura no Linux
 No Linux, o arquivo `/var/log/suricata/eve.json` geralmente pertence ao usuário `suricata`. Para permitir que o MCP leia os eventos sem precisar de root:
 
 ```bash
