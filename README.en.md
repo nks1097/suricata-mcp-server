@@ -81,6 +81,29 @@ Production-ready **Model Context Protocol (MCP)** server for **Suricata IDS/IPS,
 
 ## 🚀 Universal Quick Start
 
+### Step 0: Install `uv` (If not already installed)
+
+`uv` is the recommended ultra-fast package manager. If not yet installed:
+
+* **Windows (PowerShell):**
+  ```powershell
+  powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+  # Refresh PATH for the current shell session:
+  $env:Path = "$HOME\.local\bin;$env:Path"
+  ```
+* **Linux / macOS:**
+  ```bash
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  source $HOME/.local/bin/env
+  ```
+
+> ⚠️ **Windows Notice:** If you see `'uvx' is not recognized as the name of a cmdlet`:
+> 1. Run `$env:Path = "$HOME\.local\bin;$env:Path"` in your current PowerShell; **OR**
+> 2. Restart your terminal window; **OR**
+> 3. Call the binary directly: `& "$HOME\.local\bin\uvx.exe" ...`
+
+---
+
 ### Option 1: Zero-Install with `uvx` (Recommended)
 No git clone or manual setup required. `uvx` executes the server directly from GitHub:
 
@@ -91,7 +114,18 @@ uvx --from git+https://github.com/nks1097/suricata-mcp-server.git suricata-mcp -
 
 ---
 
-### Option 2: Installation using `pip` or `git`
+### Option 2: Direct Installation via `pip` (Without uv)
+```bash
+# Install directly from GitHub
+pip install git+https://github.com/nks1097/suricata-mcp-server.git
+
+# Run environment health check
+suricata-mcp --doctor
+```
+
+---
+
+### Option 3: Cloning Repository (For Developers)
 ```bash
 # 1. Clone the repository
 git clone https://github.com/nks1097/suricata-mcp-server.git
@@ -99,7 +133,8 @@ cd suricata-mcp-server
 
 # 2. Create and activate virtual environment
 python3 -m venv .venv
-source .venv/bin/activate # On Windows: .\.venv\Scripts\Activate.ps1
+# On Linux/macOS: source .venv/bin/activate
+# On Windows:     .\.venv\Scripts\Activate.ps1
 
 # 3. Install package in editable mode
 pip install -e .

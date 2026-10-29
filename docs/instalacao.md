@@ -6,15 +6,40 @@ O **Suricata MCP Server** foi projetado para operar com zero atrito em qualquer 
 
 ## 🚀 Método 1: Zero-Install com `uvx` (Recomendado)
 
-Se você utiliza `uv` na sua máquina, **não é necessário clonar o repositório nem gerenciar ambientes virtuais manualmente**. O `uvx` baixa, isola e executa o servidor instantaneamente a partir do GitHub:
+Se você já possui o `uv` instalado, **não é necessário clonar o repositório nem gerenciar ambientes virtuais manualmente**. O `uvx` baixa, isola e executa o servidor instantaneamente a partir do GitHub:
 
 ```bash
 uvx --from git+https://github.com/nks1097/suricata-mcp-server.git suricata-mcp --doctor
 ```
 
+### Como instalar o `uv` caso ainda não possua:
+* **Windows (PowerShell):**
+  ```powershell
+  powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+  # ATENÇÃO: Recarregue o PATH da sua janela atual:
+  $env:Path = "$HOME\.local\bin;$env:Path"
+  ```
+* **Linux / macOS:**
+  ```bash
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  source $HOME/.local/bin/env
+  ```
+
+> 💡 **Nota Windows:** Se o comando `uvx` retornar erro de comando não reconhecido, execute `$env:Path = "$HOME\.local\bin;$env:Path"` ou feche e reabra o terminal.
+
 ---
 
-## 🛠️ Método 2: Instalação via `pip` ou `uv`
+## 📦 Método 2: Instalação Direta com `pip` (Sem uv)
+Se preferir usar o Python padrão sem instalar o `uv`:
+
+```bash
+pip install git+https://github.com/nks1097/suricata-mcp-server.git
+suricata-mcp --doctor
+```
+
+---
+
+## 🛠️ Método 3: Instalação via Clone Local (Para Desenvolvedores)
 
 ### Linux / macOS
 ```bash

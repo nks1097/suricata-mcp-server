@@ -83,6 +83,29 @@ Consulte o catálogo completo em [docs/ferramentas.md](docs/ferramentas.md).
 
 ## 🚀 Instalação Rápida e Universal
 
+### Passo 0: Ter o `uv` instalado (Se ainda não tiver)
+
+O `uv` é o gerenciador de pacotes ultrarrápido recomendado. Se ainda não possui:
+
+* **Windows (PowerShell):**
+  ```powershell
+  powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+  # ATENÇÃO: Recarregue o PATH da sua janela atual:
+  $env:Path = "$HOME\.local\bin;$env:Path"
+  ```
+* **Linux / macOS:**
+  ```bash
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  source $HOME/.local/bin/env
+  ```
+
+> ⚠️ **Atenção Windows:** Se após instalar o `uv` você receber o erro `O termo 'uvx' não é reconhecido`:
+> 1. Execute `$env:Path = "$HOME\.local\bin;$env:Path"` no PowerShell atual; **OU**
+> 2. Feche e abra uma nova janela do terminal; **OU**
+> 3. Chame diretamente com o caminho completo: `& "$HOME\.local\bin\uvx.exe" ...`
+
+---
+
 ### Opção 1: Zero-Install com `uvx` (Recomendado)
 Não é necessário clonar nem instalar nada manualmente. O comando `uvx` executa o servidor diretamente do GitHub:
 
@@ -93,7 +116,18 @@ uvx --from git+https://github.com/nks1097/suricata-mcp-server.git suricata-mcp -
 
 ---
 
-### Opção 2: Instalação via `pip` ou `git`
+### Opção 2: Instalação direta com `pip` (Sem precisar de uv)
+```bash
+# Instala diretamente do repositório oficial
+pip install git+https://github.com/nks1097/suricata-mcp-server.git
+
+# Executa o diagnóstico automático
+suricata-mcp --doctor
+```
+
+---
+
+### Opção 3: Clonando o repositório (Para desenvolvedores)
 ```bash
 # 1. Clone o repositório
 git clone https://github.com/nks1097/suricata-mcp-server.git
@@ -104,7 +138,7 @@ python -m venv .venv
 # No Linux/macOS: source .venv/bin/activate
 # No Windows:     .\.venv\Scripts\Activate.ps1
 
-# 3. Instale o pacote
+# 3. Instale em modo editável
 pip install -e .
 
 # 4. Execute o diagnóstico automático
@@ -158,6 +192,9 @@ suricata-mcp --doctor
   }
 }
 ```
+
+> 💡 **Dica Windows para Claude Desktop:** Se o Claude exibir erro informando que não encontrou o comando `uvx`, defina o caminho absoluto do binário:
+> `"command": "C:\\Users\\SEU_USUARIO\\.local\\bin\\uvx.exe"` (substituindo `SEU_USUARIO` pelo seu usuário do Windows) ou use `"command": "python"`, `"args": ["-m", "suricata_mcp.server", "--transport", "stdio"]` se tiver instalado via `pip`.
 
 ---
 
