@@ -113,7 +113,9 @@ Não é necessário clonar nem instalar nada manualmente. O comando `uvx` execut
 # Diagnóstico automático do seu ambiente Suricata
 uvx --from git+https://github.com/nks1097/suricata-mcp-server.git suricata-mcp --doctor
 ```
+### VIDEO DE CONFIGURAÇÃO DE FORMA SIMPLIFICADA
 
+ ▶️ **[Clique aqui para assistir ao vídeo completo no Google Drive Assiste em Full Hd (1080P)](https://drive.google.com/file/d/1TfmgfF_5ZUVM2LLYEZjAnSn6_PJfFsjF/view?usp=drive_link)**
 ---
 
 ### Opção 2: Instalação direta com `pip` (Sem precisar de uv)
