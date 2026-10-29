@@ -1,0 +1,6 @@
+# Exemplo de regras canônicas do Suricata para testes automatizados
+alert tcp $EXTERNAL_NET any -> $HOME_NET 80 (msg:"ET EXPLOIT Apache log4j RCE Attempt (CVE-2021-44228)"; flow:established,to_server; content:"${jndi:"; nocase; classtype:attempted-admin; sid:2100498; rev:7;)
+alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"ET POLICY Suspicious outbound curl user agent"; flow:established,to_server; http.user_agent; content:"curl/"; startswith; classtype:bad-unknown; sid:2013028; rev:6;)
+alert dns $HOME_NET any -> any 53 (msg:"ET MALWARE High Entropy DGA Domain Query"; dns.query; pcre:"/^[a-z0-9]{20,}\./"; classtype:trojan-activity; sid:2024001; rev:1;)
+# alert tcp any any -> any 23 (msg:"ET SCAN Potential Telnet Scan"; sid:2000001; rev:1;)
+

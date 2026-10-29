@@ -1,0 +1,36 @@
+services:
+  suricata-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: suricata-mcp-server
+    restart: unless-stopped
+    environment:
+      - SURICATA_CONFIG_PATH=/etc/suricata/suricata.yaml
+      - SURICATA_EVE_PATH=/var/log/suricata/eve.json
+      - SURICATA_LOG_DIR=/var/log/suricata
+      - SURICATA_UNIX_SOCKET_PATH=/var/run/suricata/suricata-command.socket
+      - SURICATA_RULES_DIR=/var/lib/suricata/rules
+      - SURICATA_LOCAL_RULES_PATH=/var/lib/suricata/rules/local.rules
+      - SURICATA_PCAP_ALLOWED_DIR=/app/pcaps
+      - MCP_TRANSPORT=sse
+      - MCP_HOST=0.0.0.0
+      - MCP_PORT=8080
+      - MCP_OPERATION_MODE=operacional
+      - MCP_AUDIT_ENABLED=true
+      - MCP_REPORT_OUTPUT_DIR=/app/reports_output
+    volumes:
+      # Monta logs e soquetes do Suricata do host em modo somente leitura para segurança
+      - /var/log/suricata:/var/log/suricata:ro
+      - /etc/suricata:/etc/suricata:ro
+      - /var/run/suricata:/var/run/suricata:ro
+      - ./reports_output:/app/reports_output:rw
+      - ./pcaps:/app/pcaps:rw
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+

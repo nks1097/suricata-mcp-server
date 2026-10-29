@@ -1,0 +1,32 @@
+# Configuração de teste para validação de sintaxe e inspeção
+%YAML 1.1
+---
+suricata-version: "8.0"
+
+vars:
+  address-groups:
+    HOME_NET: "[192.168.0.0/16,10.0.0.0/8,172.16.0.0/12]"
+    EXTERNAL_NET: "!$HOME_NET"
+
+default-log-dir: ./log
+
+outputs:
+  - fast:
+      enabled: yes
+      filename: fast.log
+  - eve-log:
+      enabled: yes
+      filetype: regular
+      filename: eve.json
+      types:
+        - alert
+        - anomaly
+        - http
+        - dns
+        - tls
+        - flow
+        - stats
+
+rule-files:
+  - sample_rules.rules
+  - local.rules
