@@ -45,3 +45,4 @@ O **Suricata MCP Server** é 100% configurável por meio de variáveis de ambien
 
 3. **`administrativo`:**
    * Libera todas as 100 ferramentas, incluindo edição e adição de regras em `local.rules`, execução de `suricata-update` e atualização do `suricata.yaml`.
+

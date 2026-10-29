@@ -151,3 +151,4 @@ O servidor implementa **100 ferramentas em português**, rigorosamente tipadas e
 98. `suricata_executar_fluxo_aprovado`: Executa procedimento operacional pré-aprovado.
 99. `suricata_consultar_auditoria_mcp`: Consulta o histórico e trilha de auditoria do MCP Server.
 100. `suricata_diagnosticar_ambiente`: Produz diagnóstico 360° unificando sensor, regras e integridade.
+

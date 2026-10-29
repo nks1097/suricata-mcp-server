@@ -34,3 +34,4 @@ Antes de gravar qualquer registro na trilha de auditoria ou retornar respostas a
 * Tokens e chaves de API (`api_key`, `token`, `bearer`).
 * Senhas e credenciais (`password`, `secret`, `passwd`).
 * Chaves privadas RSA/ECDSA/OpenSSH (`-----BEGIN ... PRIVATE KEY-----`).
+

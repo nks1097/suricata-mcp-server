@@ -45,3 +45,4 @@ Guia de diagnóstico e resolução dos cenários de falha mais comuns ao utiliza
 
 * **Causa:** Alguma biblioteca ou módulo gravou mensagens de log diretamente no `stdout` (padrão de saída do sistema), violando o protocolo JSON-RPC do MCP.
 * **Resolução:** O Suricata MCP Server direciona todos os seus logs para `stderr`. Verifique se você não adicionou chamadas a `print()` em código customizado.
+

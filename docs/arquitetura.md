@@ -69,3 +69,4 @@ Arquivos `eve.json` em produção frequentemente atingem dezenas de gigabytes po
 * Gera relatórios formatados em PDF nativo com tabelas estilizadas (ReportLab).
 * Gera planilhas multi-abas formatadas em XLSX (OpenPyXL).
 * Exporta telemetria bruta em CSV e JSON estruturado.
+

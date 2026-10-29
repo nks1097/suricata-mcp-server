@@ -1,6 +1,6 @@
 # Suricata MCP Server 🛡️🚀
 
-[![CI/CD Pipeline](https://github.com/NatanaelKrindges/suricata-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/NatanaelKrindges/suricata-mcp-server/actions)
+[![CI/CD Pipeline](https://github.com/nks1097/suricata-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/nks1097/suricata-mcp-server/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![MCP Protocol](https://img.shields.io/badge/MCP-1.0+-green.svg)](https://modelcontextprotocol.io/)
@@ -90,7 +90,7 @@ Consulte o catálogo completo em [docs/ferramentas.md](docs/ferramentas.md).
 ### 2. Instalação com `uv`
 ```powershell
 # Clone o repositório
-git clone https://github.com/NatanaelKrindges/suricata-mcp-server.git
+git clone https://github.com/nks1097/suricata-mcp-server.git
 cd suricata-mcp-server
 
 # Crie e ative o ambiente virtual
@@ -149,3 +149,4 @@ mypy src
 Distribuído sob a licença **MIT**. Veja [LICENSE](LICENSE) para mais detalhes.
 
 **Autor:** Natanael Krindges (<natanael1097@gmail.com>)
+

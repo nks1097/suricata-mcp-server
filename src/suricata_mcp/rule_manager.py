@@ -106,9 +106,12 @@ class RuleManager:
     def get_local_rules_file(self) -> Path:
         """Garante a existência e retorna o caminho para o arquivo de regras locais."""
         path = Path(self.settings.suricata_local_rules_path).resolve()
-        path.parent.mkdir(parents=True, exist_ok=True)
-        if not path.exists():
-            path.write_text("# Regras locais customizadas gerenciadas pelo Suricata MCP Server\n", encoding="utf-8")
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            if not path.exists():
+                path.write_text("# Regras locais customizadas gerenciadas pelo Suricata MCP Server\n", encoding="utf-8")
+        except (PermissionError, OSError):
+            pass
         return path
 
     def backup_rules_file(self, file_path: Path) -> Path:
@@ -131,13 +134,17 @@ class RuleManager:
     def list_rules(self, limit: int = 100, active_only: bool = False) -> list[dict[str, Any]]:
         """Lista regras disponíveis no diretório de regras e no arquivo local."""
         rules = []
-        local_file = self.get_local_rules_file()
-        files_to_scan = [local_file]
+        try:
+            local_file = self.get_local_rules_file()
+            files_to_scan = [local_file] if local_file.is_file() else []
+        except Exception:
+            local_file = None
+            files_to_scan = []
 
         rules_dir = self.settings.get_rules_dir()
         if rules_dir.is_dir():
             for p in rules_dir.glob("*.rules"):
-                if p != local_file and p.is_file():
+                if (local_file is None or p != local_file) and p.is_file():
                     files_to_scan.append(p)
 
         for fpath in files_to_scan:
@@ -160,10 +167,33 @@ class RuleManager:
 
     def find_rule_by_sid(self, sid: int) -> dict[str, Any] | None:
         """Busca uma regra específica pelo seu Signature ID (SID)."""
-        rules = self.list_rules(limit=5000, active_only=False)
-        for r in rules:
-            if r.get("sid") == sid:
-                return r
+        sid_pattern = re.compile(rf"\bsid\s*:\s*{sid}\b")
+        try:
+            local_file = self.get_local_rules_file()
+            files_to_scan = [local_file] if local_file.is_file() else []
+        except Exception:
+            local_file = None
+            files_to_scan = []
+
+        rules_dir = self.settings.get_rules_dir()
+        if rules_dir.is_dir():
+            for p in rules_dir.glob("*.rules"):
+                if (local_file is None or p != local_file) and p.is_file():
+                    files_to_scan.append(p)
+
+        for fpath in files_to_scan:
+            try:
+                with open(fpath, encoding="utf-8", errors="ignore") as f:
+                    for line_num, line in enumerate(f, 1):
+                        if str(sid) in line and sid_pattern.search(line):
+                            rule = parse_rule_line(line)
+                            if rule and rule.sid == sid:
+                                item = rule.model_dump()
+                                item["arquivo"] = str(fpath.name)
+                                item["linha"] = line_num
+                                return item
+            except Exception:
+                continue
         return None
 
     def add_local_rule(self, rule_text: str) -> dict[str, Any]:

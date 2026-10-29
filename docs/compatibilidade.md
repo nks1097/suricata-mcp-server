@@ -31,3 +31,4 @@ Esta matriz detalha as versões do Suricata, sistemas operacionais e interpretad
 * **Python 3.11:** Suportado e testado em CI.
 * **Python 3.12:** Recomendado para implantações em produção.
 * **Python 3.13 / 3.14:** Compatível e homologado.
+

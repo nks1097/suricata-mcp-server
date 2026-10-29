@@ -35,3 +35,4 @@ O módulo de análise offline do **Suricata MCP Server** permite que analistas d
 1. **Restrição de Diretório:** Apenas arquivos situados dentro da pasta definida em `SURICATA_PCAP_ALLOWED_DIR` podem ser analisados.
 2. **Prevenção de DoS:** Limite estrito de tamanho de arquivo (`SURICATA_MAX_PCAP_SIZE_MB`, padrão: 100 MB) e timeout de processo de 60 segundos.
 3. **Isolamento de Estado:** A análise offline nunca altera as estatísticas nem os arquivos de log do sensor em tempo real.
+

@@ -23,3 +23,4 @@ O Suricata utiliza o formato **EVE (Extensible Event Format)** para registrar ev
 Para ambientes de alta volumetria:
 * O MCP lê o arquivo de trás para frente usando saltos de bloco de 64 KB (`tail_eve_events`).
 * Para consultas em massa ou streaming, utilize `stream_eve_events` que consome apenas uma linha por iteração via gerador Python.
+

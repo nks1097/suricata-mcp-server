@@ -103,3 +103,4 @@ docker compose logs -f suricata-mcp
   }
 }
 ```
+

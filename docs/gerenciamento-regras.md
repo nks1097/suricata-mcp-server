@@ -24,3 +24,4 @@ alert tcp $EXTERNAL_NET any -> $HOME_NET 80 (msg:"ET EXPLOIT Apache log4j RCE At
 3. **Backup Automático:** Toda operação de escrita cria previamente uma cópia do arquivo no formato `local.rules.<YYYYMMDD_HHMMSS>.bak`.
 4. **Aplicação com Privilégio Administrativo:** Requer que o MCP esteja configurado em `MCP_OPERATION_MODE=administrativo`.
 5. **Recarga a Quente (Hot Reload):** Após alterar a regra, invoque `suricata_recarregar_regras` para carregar o novo conjunto sem interromper a inspeção de pacotes.
+
