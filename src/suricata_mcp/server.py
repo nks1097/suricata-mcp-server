@@ -190,11 +190,21 @@ def run_doctor() -> int:
     print("📋 CONFIGURAÇÃO RECOMENDADA PARA SEU CLIENTE MCP (COPIE E COLE)")
     print("=" * 72)
 
+    # Determina o executável exato do uvx (evita falhas de PATH em aplicativos GUI como LM Studio e Claude Desktop)
+    uvx_cmd = "uvx"
+    uvx_bin = shutil.which("uvx") or shutil.which("uvx.exe")
+    if not uvx_bin and os.name == "nt":
+        default_local_uvx = Path.home() / ".local" / "bin" / "uvx.exe"
+        if default_local_uvx.is_file():
+            uvx_bin = str(default_local_uvx)
+    if uvx_bin:
+        uvx_cmd = str(uvx_bin).replace("\\", "/")
+
     # Exemplo Universal com uvx (funciona em qualquer máquina do mundo)
     universal_uvx_config = {
         "mcpServers": {
             "suricata": {
-                "command": "uvx",
+                "command": uvx_cmd,
                 "args": [
                     "--from",
                     "git+https://github.com/nks1097/suricata-mcp-server.git",
