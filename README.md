@@ -263,7 +263,7 @@ chmod 600 ~/.ssh/authorized_keys
 
 Valide o acesso sem senha a partir do cliente:
 ```powershell
-ssh -p 2222 -o BatchMode=yes root@192.168.0.107 "echo OK"
+ssh -p 22 -o BatchMode=yes root@192.168.0.107 "echo OK"
 ```
 *(Retornando `OK`, a autenticação está pronta).*
 
@@ -279,14 +279,14 @@ ssh -p 2222 -o BatchMode=yes root@192.168.0.107 "echo OK"
       "command": "ssh",
       "args": [
         "-p",
-        "2222",
+        "<PORTA_EXTERNA>",
         "-o",
         "BatchMode=yes",
         "-o",
         "ServerAliveInterval=30",
         "-o",
         "ServerAliveCountMax=3",
-        "root@192.168.0.107",
+        "<USUARIO>@<IP_PUBLICO_OU_DDNS>",
         "SURICATA_CONFIG_PATH=/etc/suricata/suricata.yaml SURICATA_EVE_PATH=/var/log/suricata/eve.json MCP_OPERATION_MODE=operacional ~/.local/bin/uvx --from git+https://github.com/nks1097/suricata-mcp-server.git suricata-mcp"
       ]
     }
