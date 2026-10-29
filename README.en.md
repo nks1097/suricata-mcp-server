@@ -119,8 +119,8 @@ uvx --from git+https://github.com/nks1097/suricata-mcp-server.git suricata-mcp -
 # Install directly from GitHub
 pip install git+https://github.com/nks1097/suricata-mcp-server.git
 
-# Run environment health check
-suricata-mcp --doctor
+# Run environment health check (works reliably via Python, avoiding Windows Scripts PATH issues)
+python -m suricata_mcp --doctor
 ```
 
 ---

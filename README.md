@@ -121,8 +121,8 @@ uvx --from git+https://github.com/nks1097/suricata-mcp-server.git suricata-mcp -
 # Instala diretamente do repositório oficial
 pip install git+https://github.com/nks1097/suricata-mcp-server.git
 
-# Executa o diagnóstico automático
-suricata-mcp --doctor
+# Executa o diagnóstico automático (funciona sempre via Python, sem erro de PATH no Windows):
+python -m suricata_mcp --doctor
 ```
 
 ---
@@ -142,7 +142,7 @@ python -m venv .venv
 pip install -e .
 
 # 4. Execute o diagnóstico automático
-suricata-mcp --doctor
+python -m suricata_mcp --doctor
 ```
 
 ---

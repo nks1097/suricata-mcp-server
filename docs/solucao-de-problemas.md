@@ -72,3 +72,15 @@ Guia de diagnóstico e resolução dos cenários de falha mais comuns ao utiliza
   "args": ["-m", "suricata_mcp.server", "--transport", "stdio"]
   ```
 
+---
+
+## 7. Erro no Windows: "O termo 'suricata-mcp' não é reconhecido como nome de cmdlet"
+
+* **Causa:** Ao instalar com `pip install`, o Windows coloca o executável `.exe` na pasta `AppData\Roaming\Python\PythonXX\Scripts`, que por padrão não vem configurada no `PATH` do sistema.
+* **Resolução Universal (Sem mexer em PATH):**
+  Execute o servidor ou o diagnóstico diretamente através do módulo Python:
+  ```powershell
+  python -m suricata_mcp --doctor
+  ```
+  Isso funciona em 100% dos casos, pois o interpretador `python` já está no seu PATH.
+

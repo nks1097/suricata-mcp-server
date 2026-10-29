@@ -34,7 +34,7 @@ Se preferir usar o Python padrão sem instalar o `uv`:
 
 ```bash
 pip install git+https://github.com/nks1097/suricata-mcp-server.git
-suricata-mcp --doctor
+python -m suricata_mcp --doctor
 ```
 
 ---
