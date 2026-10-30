@@ -250,6 +250,9 @@ Gere um par de chaves no computador cliente (onde está o LM Studio/Claude Deskt
 ssh-keygen -t ed25519 -N '""'
 Get-Content "$env:USERPROFILE\.ssh\id_ed25519.pub"
 ```
+* Exemplo 1 Configurar Chave SSH no Cliente (Sem Senha)
+![Criando o arquivo .env](imagens/1.png)
+
 *(No Linux ou macOS cliente, use `ssh-keygen -t ed25519 -N ""` e `cat ~/.ssh/id_ed25519.pub`)*.
 
 Copie a chave exibida (iniciando em `ssh-ed25519 AAAAC3...`).
@@ -260,13 +263,20 @@ mkdir -p ~/.ssh && chmod 700 ~/.ssh
 echo "COLE_AQUI_A_CHAVE_COPIADA" >> ~/.ssh/authorized_keys
 chmod 600 ~/.ssh/authorized_keys
 ```
+* Exemplo 2 Copie a chave exibida
+![Criando o arquivo .env](imagens/2.png)
 
 Valide o acesso sem senha a partir do cliente:
 ```powershell
-ssh -p 22 -o BatchMode=yes root@192.168.0.107 "echo OK"
+ssh -p SUA_PORTA_SSH -o BatchMode=yes USEU_USUARIO@IP_DO_SERVIDOR "echo OK"
 ```
+* Exemplo 3 Valide o acesso sem senha a partir do cliente
+![Criando o arquivo .env](imagens/3.png)
+
 *(Retornando `OK`, a autenticação está pronta).*
 
+* Exemplo 4 (Retornando `OK`, a autenticação está pronta)
+![Criando o arquivo .env](imagens/4.png)
 ---
 
 #### Passo 2: Configuração no `mcp.json`
@@ -316,6 +326,9 @@ ssh -p 22 -o BatchMode=yes root@192.168.0.107 "echo OK"
   }
 }
 ```
+* Exemplo 5 para Internet Externa (WAN / DDNS / Cloud)
+![Criando o arquivo .env](imagens/5.png)
+
 ### VIDEO DE CONFIGURAÇÃO DE FORMA SIMPLIFICADA PARA CONFIGURAR O SSH DO MCP DE UM SERVIDOR EXTERNO
 
  ▶️ **[Clique aqui para assistir ao vídeo completo no Google Drive Assiste em Full Hd (1080P)](https://drive.google.com/file/d/1lm1zdztMoavf4EO4UpUvI2wyehSaStHf/view?usp=drive_link)**
