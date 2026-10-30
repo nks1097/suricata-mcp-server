@@ -263,7 +263,7 @@ mkdir -p ~/.ssh && chmod 700 ~/.ssh
 echo "COLE_AQUI_A_CHAVE_COPIADA" >> ~/.ssh/authorized_keys
 chmod 600 ~/.ssh/authorized_keys
 ```
-* Exemplo 2 Copie a chave exibida
+* Exemplo 2 
 ![Criando o arquivo .env](imagens/2.png)
 
 Valide o acesso sem senha a partir do cliente:
@@ -275,8 +275,6 @@ ssh -p SUA_PORTA_SSH -o BatchMode=yes USEU_USUARIO@IP_DO_SERVIDOR "echo OK"
 
 *(Retornando `OK`, a autenticação está pronta).*
 
-* Exemplo 4 (Retornando `OK`, a autenticação está pronta)
-![Criando o arquivo .env](imagens/4.png)
 ---
 
 #### Passo 2: Configuração no `mcp.json`
