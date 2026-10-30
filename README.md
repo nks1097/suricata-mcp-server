@@ -316,6 +316,9 @@ ssh -p 22 -o BatchMode=yes root@192.168.0.107 "echo OK"
   }
 }
 ```
+### VIDEO DE CONFIGURAÇÃO DE FORMA SIMPLIFICADA PARA CONFIGURAR O SSH DO MCP DE UM SERVIDOR EXTERNO
+
+ ▶️ **[Clique aqui para assistir ao vídeo completo no Google Drive Assiste em Full Hd (1080P)](https://drive.google.com/file/d/1lm1zdztMoavf4EO4UpUvI2wyehSaStHf/view?usp=drive_link)**
 
 > 🛡️ **Parâmetros de Estabilidade de Conexão:**
 > * `BatchMode=yes`: Impede travamento por prompts interativos de senha caso a chave falhe.
